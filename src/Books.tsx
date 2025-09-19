@@ -47,6 +47,10 @@ const BooksAxios: React.FC = () => {
         loadBooks(page, perPage, q);
     }, [page, perPage, q]);
 
+    useEffect(() => {
+        setQInput(q);
+    }, [q]);
+
     const setParams = (nextPage: number, nextPerPage: number, nextQ = q) => {
         const safePage = Math.max(1, Math.floor(nextPage) || 1);
         const safePer = Math.max(1, Math.floor(nextPerPage) || 1);
@@ -56,26 +60,35 @@ const BooksAxios: React.FC = () => {
         setSearchParams(params);
     };
 
-    if (loading) return <p>Loading…</p>;
-    if (error) return <p>Error: {error}</p>;
+    if (loading) return (
+        <div className="space-y-3">
+            <div className="h-10 w-full max-w-md animate-pulse rounded-lg bg-gray-200" />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: perPage }).map((_, index) => (
+                    <div key={index} className="h-28 animate-pulse rounded-xl bg-gray-200" />
+                ))}
+            </div>
+        </div>
+    );
+    if (error) return <p className="text-red-600">{error}</p>;
 
 
     return (
-        <div>
+        <div className="space-y-3">
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
                     setParams(1, perPage, qInput);
                 }}
-                style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'flex-start', marginBottom: 12 }}
-            >
+                className="mb-2 flex items-center gap-2">
                 <input
                     type="search"
                     placeholder="Search…"
                     value={qInput}
                     onChange={(e) => setQInput(e.target.value)}
+                    className="w-full max-w-md rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:ring-2 focus:ring-blue-500"
                 />
-                <button type="submit">Search</button>
+                <button type="submit" className="rounded-lg bg-blue-600 px-3 py-2 text-white hover:bg-blue-700">Search</button>
                 {q && (
                     <button
                         type="button"
@@ -83,42 +96,54 @@ const BooksAxios: React.FC = () => {
                             setQInput('');
                             setParams(1, perPage, '');
                         }}
+                        className="rounded-lg border px-3 py-2 text-gray-700 hover:bg-gray-100"
                     >
                         Clear
                     </button>
                 )}
             </form>
 
-            <ul style={{ marginTop: 12, listStyleType: 'none', padding: 0, textAlign: 'start' }}>
+            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {books.map((b) => (
-                    <li key={b.id}>
-                        {b.title} — {b.author}
+                    <li key={b.id} className="rounded-xl border bg-white p-4 shadow">
+                        <div className="font-semibold">{b.title}</div>
+                        <div className="text-sm text-gray-600">{b.author}</div>
                     </li>
                 ))}
+                {books.length === 0 && (
+                    <li className="col-span-full rounded-xl border bg-white p-6 text-center text-sm text-gray-500">
+                        No books found.
+                    </li>
+                )}
             </ul>
 
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 12 }}>
-                <button
-                    onClick={() => setParams(page - 1, perPage)}
-                    disabled={page <= 1}
-                >
-                    Prev
-                </button>
+            <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setParams(page - 1, perPage)}
+                        disabled={page <= 1}
+                        className="rounded-md border px-3 py-2 disabled:opacity-50"
+                    >
+                        Prev
+                    </button>
 
-                <span>Page {page}</span>
+                    <span className="text-sm text-gray-600">Page {page}</span>
 
-                <button
-                    onClick={() => setParams(page + 1, perPage)}
-                    disabled={books.length < perPage}
-                >
-                    Next
-                </button>
+                    <button
+                        onClick={() => setParams(page + 1, perPage)}
+                        disabled={books.length < perPage}
+                        className="rounded-md border px-3 py-2 disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
 
-                <label style={{ marginLeft: 12 }}>
-                    Per page:{' '}
+                <label className="flex items-center gap-2 text-sm">
+                    Per page: {''}
                     <select
                         value={perPage}
                         onChange={(e) => setParams(1, Number(e.target.value))}
+                        className="rounded-md border px-2 py-1"
                     >
                         <option value={5}>5</option>
                         <option value={10}>10</option>
