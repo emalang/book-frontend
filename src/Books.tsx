@@ -96,7 +96,7 @@ const BooksAxios: React.FC = () => {
                             setQInput('');
                             setParams(1, perPage, '');
                         }}
-                        className="rounded-lg border px-3 py-2 text-gray-700 hover:bg-gray-100"
+                        className="rounded-lg bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
                     >
                         Clear
                     </button>
@@ -122,7 +122,7 @@ const BooksAxios: React.FC = () => {
                     <button
                         onClick={() => setParams(page - 1, perPage)}
                         disabled={page <= 1}
-                        className="rounded-md border px-3 py-2 disabled:opacity-50"
+                        className="rounded-lg bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
                     >
                         Prev
                     </button>
@@ -132,7 +132,7 @@ const BooksAxios: React.FC = () => {
                     <button
                         onClick={() => setParams(page + 1, perPage)}
                         disabled={books.length < perPage}
-                        className="rounded-md border px-3 py-2 disabled:opacity-50"
+                        className="rounded-lg bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
                     >
                         Next
                     </button>
