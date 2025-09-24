@@ -1,0 +1,15 @@
+{
+  "tabWidth": 4,
+  "singleQuote": true,
+  "bracketSameLine": true,
+  "trailingComma": "all",
+  "tailwindConfig": "./tailwind.config.ts",
+  "overrides": [
+    {
+      "files": ["*.js", "*.tsx", "*.ts", "*.json", "*.yml", ".prettierrc"],
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
+}
