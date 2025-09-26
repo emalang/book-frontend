@@ -28,7 +28,7 @@ function Hero({ book }: { book: Book | null }) {
     if (!book) return null;
     const bg = posterFor(book);
     return (
-        <div className='relative mt-6 overflow-hidden rounded-3x1 shadow-lg'>
+        <div className='relative mt-6 overflow-hidden rounded-3xl shadow-lg'>
             <img src={bg} alt={book.title} className='h-[360px] w-full object-cover' />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6">
@@ -41,6 +41,47 @@ function Hero({ book }: { book: Book | null }) {
         </div>
     );
 }
+
+function DetailsCard({ book }: { book: Book | null }) {
+    if (!book) return null;
+    const genres = normalizeGenres(book.genres);
+    return (
+        <div className="mt-4 rounded-2xl border bg-white p-4 shadow">
+            <h3 className="mb-3 text-lg font-semibold">Details</h3>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <Detail label="Author" value={book.author} />
+                <Detail label="Publisher" value={book.publisher} />
+                <Detail label="Year" value={book.year} />
+                <Detail label="Pages" value={book.pages} />
+                <Detail label="Language" value={book.language} />
+                <div>
+                    <div className="text-center">
+                        <div className="text-sm font-medium text-gray-600">Genres</div>
+                        {genres.length ? (
+                            <div className="mt-1 flex flex-wrap justify-center gap-2">
+                                {genres.map((g) => (
+                                    <span key={g} className="rounded-full bg-gray-100 px-2 py-1 text-xs">{g}</span>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="mt-1 text-sm text-gray-500">—</div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function Detail({ label, value }: { label: string; value?: string | number }) {
+    return (
+        <div>
+            <div className='text-sm font-medium text-gray-600'>{label}</div>
+            <div className='mt-1 text-sm text-gray-900'>{value ?? '-'}</div>
+        </div>
+    )
+}
+
 
 const BooksAxios: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -183,6 +224,7 @@ const BooksAxios: React.FC = () => {
             </form>
 
             <Hero book={active} />
+            <DetailsCard book={active} />
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {books.map((b) => (
                     <li key={b.id}
