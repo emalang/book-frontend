@@ -24,6 +24,24 @@ function posterFor(b: Book) {
     return b.image_url || `https://placehold.co/1200x360?text=${encodeURIComponent(b.title)}`;
 }
 
+function Hero({ book }: { book: Book | null }) {
+    if (!book) return null;
+    const bg = posterFor(book);
+    return (
+        <div className='relative mt-6 overflow-hidden rounded-3x1 shadow-lg'>
+            <img src={bg} alt={book.title} className='h-[360px] w-full object-cover' />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6">
+                <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow">{book.title}</h1>
+                <p className="mt-2 text-neutral-200">
+                    <span className="opacity-80">Author:</span> {book.author}
+                    {book.year ? <span className="opacity-60"> • {book.year}</span> : null}
+                </p>
+            </div>
+        </div>
+    );
+}
+
 const BooksAxios: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -45,6 +63,8 @@ const BooksAxios: React.FC = () => {
     const [books, setBooks] = useState<Book[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const [active, setActive] = useState<Book | null>(null);
 
     async function loadBooks(
         currentPage: number,
@@ -73,6 +93,8 @@ const BooksAxios: React.FC = () => {
             }
 
             setBooks(items);
+            if (!active && items.length) setActive(items[0]);
+
         } catch (e: any) {
             setError(e.message ?? 'Unknown error');
         } finally {
@@ -160,9 +182,13 @@ const BooksAxios: React.FC = () => {
                 )}
             </form>
 
+            <Hero book={active} />
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {books.map((b) => (
-                    <li key={b.id} className="rounded-xl border bg-white p-4 shadow">
+                    <li key={b.id}
+                        onClick={() => setActive(b)}
+                        className="rounded-xl border bg-white p-4 shadow"
+                    >
                         <div className="font-semibold">{b.title}</div>
                         <div className="text-sm text-gray-600">{b.author}</div>
                     </li>
