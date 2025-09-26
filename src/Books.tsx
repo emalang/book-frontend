@@ -5,7 +5,7 @@ import { getBooks } from './api';
 type Book = {
     id: number;
     title: string;
-    author: string
+    author: string;
     year?: number;
     pages?: number;
     genres?: string[] | string;
@@ -54,19 +54,17 @@ function DetailsCard({ book }: { book: Book | null }) {
                 <Detail label="Year" value={book.year} />
                 <Detail label="Pages" value={book.pages} />
                 <Detail label="Language" value={book.language} />
-                <div>
-                    <div className="text-center">
-                        <div className="text-sm font-medium text-gray-600">Genres</div>
-                        {genres.length ? (
-                            <div className="mt-1 flex flex-wrap justify-center gap-2">
-                                {genres.map((g) => (
-                                    <span key={g} className="rounded-full bg-gray-100 px-2 py-1 text-xs">{g}</span>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="mt-1 text-sm text-gray-500">—</div>
-                        )}
-                    </div>
+                <div className="text-center">
+                    <div className="text-sm font-medium text-gray-600">Genres</div>
+                    {genres.length ? (
+                        <div className="mt-1 flex flex-wrap justify-center gap-2">
+                            {genres.map((g) => (
+                                <span key={g} className="rounded-full bg-gray-100 px-2 py-1 text-xs">{g}</span>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="mt-1 text-sm text-gray-500">—</div>
+                    )}
                 </div>
             </div>
         </div>
@@ -80,6 +78,38 @@ function Detail({ label, value }: { label: string; value?: string | number }) {
             <div className='mt-1 text-sm text-gray-900'>{value ?? '-'}</div>
         </div>
     )
+}
+
+function HorizontalRail({ children, title }: { children: React.ReactNode; title: string }) {
+    return (
+        <section className="mt-6">
+            <h2 className="mb-3 text-xl font-semibold">{title}</h2>
+            <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scroll-smooth
+                        [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {children}
+            </div>
+        </section>
+    );
+}
+
+function BookCard({ book, onSelect }: { book: Book, onSelect: (b: Book) => void }) {
+    const img = posterFor(book);
+    return (
+        <button
+            onClick={() => onSelect(book)}
+            className="snap-start w-[180px] shrink-0 overflow-hidden rounded-2xl shadow hover:scale-[1.02] transition"
+            title={book.title}
+            aria-label={`Open ${book.title}`}
+        >
+            <div className="relative h-[260px]">
+                <img src={img} alt={book.title} className="h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                <div className="absolute bottom-2 left-2 right-2 text-left text-sm font-medium text-white line-clamp-2">
+                    {book.title}
+                </div>
+            </div>
+        </button>
+    );
 }
 
 
@@ -106,6 +136,7 @@ const BooksAxios: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
 
     const [active, setActive] = useState<Book | null>(null);
+    const visibleBooks = useMemo(() => books.slice(0, perPage), [books, perPage]);
 
     async function loadBooks(
         currentPage: number,
@@ -134,7 +165,6 @@ const BooksAxios: React.FC = () => {
             }
 
             setBooks(items);
-            if (!active && items.length) setActive(items[0]);
 
         } catch (e: any) {
             setError(e.message ?? 'Unknown error');
@@ -150,6 +180,11 @@ const BooksAxios: React.FC = () => {
     useEffect(() => {
         setQInput(q);
     }, [q]);
+
+    useEffect(() => {
+        setActive(visibleBooks[0] ?? null);
+    }, [page, perPage, q, books, visibleBooks]);
+
 
     const setParams = (
         nextPage: number,
@@ -173,13 +208,14 @@ const BooksAxios: React.FC = () => {
     if (loading)
         return (
             <div className="space-y-3">
+                {/* search skeleton */}
                 <div className="h-10 w-full max-w-md animate-pulse rounded-lg bg-gray-200" />
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: perPage }).map((_, index) => (
-                        <div
-                            key={index}
-                            className="h-28 animate-pulse rounded-xl bg-gray-200"
-                        />
+                {/* hero skeleton */}
+                <div className="h-[360px] w-full animate-pulse rounded-3xl bg-gray-200" />
+                {/* rail skeleton (horizontal) */}
+                <div className="mt-4 flex gap-4">
+                    {Array.from({ length: perPage }).map((_, i) => (
+                        <div key={i} className="h-[260px] w-[180px] animate-pulse rounded-2xl bg-gray-200" />
                     ))}
                 </div>
             </div>
@@ -225,23 +261,16 @@ const BooksAxios: React.FC = () => {
 
             <Hero book={active} />
             <DetailsCard book={active} />
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {books.map((b) => (
-                    <li key={b.id}
-                        onClick={() => setActive(b)}
-                        className="rounded-xl border bg-white p-4 shadow"
-                    >
-                        <div className="font-semibold">{b.title}</div>
-                        <div className="text-sm text-gray-600">{b.author}</div>
-                    </li>
+            <HorizontalRail title={`All books (showing ${visibleBooks.length})`}>
+                {visibleBooks.map((b) => (
+                    <BookCard key={b.id} book={b} onSelect={setActive} />
                 ))}
-
-                {books.length === 0 && (
-                    <li className="col-span-full rounded-xl border bg-white p-6 text-center text-sm text-gray-500">
+                {visibleBooks.length === 0 && (
+                    <div className="rounded-xl border bg-white p-6 text-center text-sm text-gray-500">
                         No books found.
-                    </li>
+                    </div>
                 )}
-            </ul>
+            </HorizontalRail>
 
             <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
