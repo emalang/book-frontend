@@ -3,7 +3,7 @@ import BooksAxios from './Books';
 
 export default function App() {
     return (
-        <div className="min-h-screen w-full text-white bg-slate-950 relative overflow-x-hidden">
+        <div className="min-h-screen w-full text-white bg-slate-950 relative overflow-x-hidden overflow-y-scroll [scrollbar-gutter:stable]">
             <div className="pointer-events-none absolute inset-0
         bg-[radial-gradient(800px_circle_at_0%_0%,rgba(56,189,248,0.12),transparent_40%),
              radial-gradient(900px_circle_at_100%_0%,rgba(34,197,94,0.10),transparent_40%),
